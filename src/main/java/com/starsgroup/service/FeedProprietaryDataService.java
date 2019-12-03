@@ -3,9 +3,11 @@ package com.starsgroup.service;
 import com.starsgroup.entity.Event;
 import com.starsgroup.entity.FeedHeader;
 import com.starsgroup.entity.RawFeed;
+import com.starsgroup.util.FeedOperation;
 import com.starsgroup.util.FeedParser;
 import com.starsgroup.util.FeedType;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,14 +32,17 @@ public class FeedProprietaryDataService {
     @Value("${provider.service.port}")
     private int providerPort;
 
+    @Autowired
+    FixtureService fixtureService;
+
     public void receiveData() throws IOException {
         try {
             rawFeed = new RawFeed();
             startConnection(providerHost, providerPort);
-            String inputLine = null;
-            while ((inputLine = in.readLine()) != null) {
-                FeedHeader feedHeader = FeedParser.parseHeader(inputLine);
-                parseFeed(inputLine, feedHeader.getType());
+            String inputLine;
+
+            while((inputLine = in.readLine()) != null) {
+                dbUpsert(inputLine);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,6 +77,40 @@ public class FeedProprietaryDataService {
                 rawFeed.getMarkets().stream().filter(market -> market.getEventId().equals(event.getEventId())).collect(toList())
         ));
         return Collections.unmodifiableList(rawFeed.getEvents());
+    }
+
+    protected void dbUpsert(String inputLine) {
+        FeedHeader feedHeader = FeedParser.parseHeader(inputLine);
+        switch (FeedOperation.valueOf(feedHeader.getOperation())) {
+            case create:
+                parseFeed(inputLine, feedHeader.getType());
+                break;
+            case update:
+                persistNewlyCreatedFixtures();
+                parseFeed(inputLine, feedHeader.getType());
+                updateFixture();
+                break;
+        }
+    }
+
+    private void updateFixture() {
+        if (!rawFeed.getEvents().isEmpty()) {
+            fixtureService.updateEvent(rawFeed.getEvents().get(0));
+        }
+        if (!rawFeed.getMarkets().isEmpty()) {
+            // TODO: Yet to implement
+        }
+        if (!rawFeed.getOutcomes().isEmpty()) {
+            // TODO: Yet to implement
+        }
+    }
+
+    private void persistNewlyCreatedFixtures() {
+        if (!rawFeed.isEmpty()) {
+            List<Event> events = transformFeeds();
+            fixtureService.addEvents(events);
+            rawFeed.clear();
+        }
     }
 
     private void startConnection(String ip, int port) throws IOException {

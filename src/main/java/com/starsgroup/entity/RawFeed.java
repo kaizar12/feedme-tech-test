@@ -16,4 +16,15 @@ public class RawFeed {
         markets = new ArrayList<>();
         outcomes = new ArrayList<>();
     }
+
+    public void clear() {
+        events.clear();
+        markets.clear();
+        outcomes.clear();
+    }
+
+    public boolean isEmpty() {
+        return events.isEmpty() && markets.isEmpty() && outcomes.isEmpty();
+    }
+
 }

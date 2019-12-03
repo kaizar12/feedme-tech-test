@@ -17,8 +17,8 @@ import java.net.Socket;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FeedProprietaryDataServiceTest {
@@ -30,6 +30,12 @@ public class FeedProprietaryDataServiceTest {
 
     @Mock
     InputStream inputStreamMocked;
+
+    @Mock
+    RawFeed rawFeedMocked;
+
+    @Mock
+    FixtureService fixtureServiceMocked;
 
     @Before
     public void setUp() throws IOException {
@@ -46,9 +52,12 @@ public class FeedProprietaryDataServiceTest {
 
     @Test
     public void abortFeedProcess() throws IOException {
-        feedProprietaryDataService.setClientSocket(socketMocked);
+        RawFeed rawFeed = createRawFeed();
+        feedProprietaryDataService.setFixtureService(fixtureServiceMocked);
+        doNothing().when(fixtureServiceMocked).addEvents(anyListOf(Event.class));
+        when(fixtureServiceMocked.getAllEvents()).thenReturn(rawFeed.getEvents());
+        feedProprietaryDataService.setRawFeed(rawFeed);
         feedProprietaryDataService.abortFeedProcess();
-        verify(socketMocked).close();
     }
 
     @Test
@@ -91,6 +100,15 @@ public class FeedProprietaryDataServiceTest {
         Outcome expectedOutcome = rawFeed.getOutcomes().get(0);
         Outcome actualOutcome = transformed.get(0).getMarkets().get(0).getOutcomes().get(0);
         assertEquals(expectedOutcome, actualOutcome);
+    }
+
+    @Test
+    public void dbUpsert() {
+        String inputLine = "|2054|create|event|1497359166352|ee4d2439-e1c5-4cb7-98ad-9879b2fd84c2|Football|Sky Bet League Two|\\|Accrington\\| vs \\|Cambridge\\||1497359216693|0|1|";
+
+        feedProprietaryDataService.setRawFeed(rawFeedMocked);
+        feedProprietaryDataService.dbUpsert(inputLine);
+        verify(rawFeedMocked).getEvents();
     }
 
     private RawFeed createRawFeed() {
