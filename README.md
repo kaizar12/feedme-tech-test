@@ -1,38 +1,45 @@
 # FeedMe Tech Test
 
-The FeedMe tech test comes with a mock data feed service that represents one of the many types of data feeds we have to process everyday at The Stars Group.
+## Installation
 
-The challenge is to consume and transform the proprietary mock data. The proprietary data format will need to be parsed and enriched with the relevant field names and data types. For more information about the feed please read the provider README: https://hub.docker.com/r/tsgtechtest/provider/
+### Prerequisite
+
+* maven and java 1.8 are installed.
+
+* It is assumed that the feed provider server is running as per the instructions given in the 'Getting Started' section.
+
+Enter the below commands to build the application.
+  ```
+  mvn clean install
+  ```
+
+## Running
+
+Enter the below command to run the application.
+```
+mvn spring-boot:run
+```
+Go to browser and enter http://localhost:8080
+
+## Testing
+
+There are 3 links on the web page.
+
+* START Feed Process: Connects to provider server and starts receiving feeds.
+
+* Show Persisted Fixtures: Shows Fixture JSON objects persisted in mongoDb so far.
+
+* Abort Feed Process: Terminates the connection with provider server and returns Fixture JSON objects persisted in mongoDb till that time.
+
+
+## Design considerations
+* The project uses spring boot and embedded mongodb.
+
+* In order to test the functionality a web page is created using thymeleaf template.
 
 ## Tasks
 
-We realise everyone has different levels of skill and experience when it comes to development so we have listed different levels of tasks below for you to choose from. If you do not have the time or the knowledge to complete them all then that's ok, we just want to see how you approach the problem and get a feel for how you code.
-
-#### Basic Tasks
-* Create an app that connects the provider service on the exposed TCP port
-* Transform the proprietary data format into JSON using the field names and data types defined in the provider /types endpoint
-* Write unit tests
-
-#### Intermediate Tasks
-* Save the JSON into a NoSQL store with a document per fixture. Each document should contain the event data and the child markets and outcomes for the fixture
-
-#### Advanced Tasks
-Imagine that your app has been in use for a while now but the company has decided to start offering more fixtures. This has massively increased the number of packets being received and you have noticed that your NoSQL writes have become a bottleneck causing a packet latency that is too high for your real time data needs.
-
-Separating the responsibility of transforming to JSON and writing to NoSQL into separate apps should help remove the bottleneck and therefore reduce the packet latency. To facilitate doing this you will need to work out a sensible way of sharding / partitioning the JSON packets by implementing the use of a message queue service such as RabbitMQ or Kafka.
-
-With that context in mind:
-
-* Implement a way of sharding / partitioning the transformed JSON packets via one or more message queues
-* Utilising the message queue(s) move your NoSQL logic into another app that can be run multiple times to enable concurrent NoSQL writes
-
-#### Additional Tasks
-* Implement a front end that displays the hierarchical NoSQL data.
-* Create a Dockerfile for your app(s)
-
-## Languages
-
-We use a mixture of coding languages at The Stars Group but for data consumption we mainly use Java (Kotlin) and Node. For this tech test we recommend you use either Java or NodeJS, but if you don't know either or you can show off your skills better in another language then please do so.
+Basic and Intermediate Tasks have been implemented. 
 
 ## Getting Started
 
@@ -42,18 +49,3 @@ We use a mixture of coding languages at The Stars Group but for data consumption
 * Test mock feed by opening a new terminal and typing `telnet localhost 8282`. You should see a stream of packets.
 * If the tests above succeed then you are ready to start coding. If you decide to attempt the Intermediate and Advanced tasks then we suggest adding to or using the services listed in the docker-compose.yml file
 * To destroy the test environment you can type `docker-compose down`
-
-## The Deliverable
-
-Replace the contents of this README.md with:
-
-  1. A covering note explaining the technology choices you have made.
-  1. Any instructions required to run your solution and tests in a Linux environment.
-
-Email as an attachment or a link the git bundled repository showing your commit history with all your commits on the master branch:
-
-        git bundle create <anything>.bundle --all
-
-## Equality & Diversity
-
-We consider all candidates equally, fairly and without bias.  To that end, we ask that you do not leave any personally identifying information in your submission (such as your name within an author field or file, or in use as test data).  We run all VCS-based submissions through an anonymiser before assessment, so that there is no identifying information in the commit history, but this will only remove references in the committing author and email address, not deep in the code submitted.
