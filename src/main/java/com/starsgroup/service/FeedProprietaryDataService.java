@@ -46,8 +46,8 @@ public class FeedProprietaryDataService {
         }
     }
 
-    public void abortFeedProcess() {
-
+    public void abortFeedProcess() throws IOException {
+        stopConnection();
     }
 
     protected void parseFeed(String inputline, String feedType) {

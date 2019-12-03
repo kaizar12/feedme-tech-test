@@ -46,8 +46,9 @@ public class FeedProprietaryDataServiceTest {
 
     @Test
     public void abortFeedProcess() throws IOException {
+        feedProprietaryDataService.setClientSocket(socketMocked);
         feedProprietaryDataService.abortFeedProcess();
-        assertTrue(true);
+        verify(socketMocked).close();
     }
 
     @Test
