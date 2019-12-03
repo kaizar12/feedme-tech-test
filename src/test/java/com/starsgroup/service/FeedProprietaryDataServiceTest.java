@@ -1,6 +1,8 @@
 package com.starsgroup.service;
 
 import com.starsgroup.entity.Event;
+import com.starsgroup.entity.Market;
+import com.starsgroup.entity.Outcome;
 import com.starsgroup.entity.RawFeed;
 import com.starsgroup.util.FeedType;
 import org.junit.Before;
@@ -12,9 +14,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -66,6 +68,64 @@ public class FeedProprietaryDataServiceTest {
         feedProprietaryDataService.parseFeed(inputLine, FeedType.event.name());
 
         assertEquals(expectedEvent, rawFeed.getEvents().get(0));
+    }
+
+    @Test
+    public void transformFeeds() {
+        RawFeed rawFeed = createRawFeed();
+        feedProprietaryDataService.setRawFeed(rawFeed);
+        assertNull(rawFeed.getEvents().get(0).getMarkets());
+        assertNull(rawFeed.getMarkets().get(0).getOutcomes());
+
+        List<Event> transformed = feedProprietaryDataService.transformFeeds();
+
+        Event expectedEvent = rawFeed.getEvents().get(0);
+        Event actualEvent = transformed.get(0);
+        assertEquals(expectedEvent, actualEvent);
+
+        Market expectedMarket = rawFeed.getEvents().get(0).getMarkets().get(0);
+        Market actualMarket = transformed.get(0).getMarkets().get(0);
+        assertEquals(expectedMarket, actualMarket);
+
+        Outcome expectedOutcome = rawFeed.getOutcomes().get(0);
+        Outcome actualOutcome = transformed.get(0).getMarkets().get(0).getOutcomes().get(0);
+        assertEquals(expectedOutcome, actualOutcome);
+    }
+
+    private RawFeed createRawFeed() {
+        Event event = Event.builder()
+                .eventId("fff76bb6-59ab-41ff-b5a7-5e14fec38a69")
+                .category("Football")
+                .subCategory("Sky Bet League Two")
+                .name("\\|Port Vale\\| vs \\|Carlisle\\|")
+                .startTime("1575378818834")
+                .displayed("0")
+                .suspended("1")
+                .build();
+
+        Market market = Market.builder()
+                .eventId("fff76bb6-59ab-41ff-b5a7-5e14fec38a69")
+                .marketId("193ab64f-279f-4a7d-9531-007199442320")
+                .name("Full Time Result")
+                .displayed("0")
+                .suspended("1")
+                .build();
+
+        Outcome outcome = Outcome.builder()
+                .marketId("193ab64f-279f-4a7d-9531-007199442320")
+                .outcomeId("0dde5103-e7f6-412c-98d6-f4e83cfddfac")
+                .name("\\|Port Vale\\|")
+                .price("1/5")
+                .displayed("0")
+                .suspended("1")
+                .build();
+
+        RawFeed rawFeed = new RawFeed();
+        rawFeed.getEvents().add(event);
+        rawFeed.getMarkets().add(market);
+        rawFeed.getOutcomes().add(outcome);
+
+        return rawFeed;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.starsgroup.service;
 
+import com.starsgroup.entity.Event;
 import com.starsgroup.entity.FeedHeader;
 import com.starsgroup.entity.RawFeed;
 import com.starsgroup.util.FeedParser;
@@ -12,6 +13,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Setter
@@ -57,6 +62,16 @@ public class FeedProprietaryDataService {
                 rawFeed.getOutcomes().add(FeedParser.parseOutcome(inputline));
                 break;
         }
+    }
+
+    protected List<Event> transformFeeds() {
+        rawFeed.getMarkets().forEach(market -> market.setOutcomes(
+                rawFeed.getOutcomes().stream().filter(outcome -> outcome.getMarketId().equals(market.getMarketId())).collect(toList())
+        ));
+        rawFeed.getEvents().forEach(event -> event.setMarkets(
+                rawFeed.getMarkets().stream().filter(market -> market.getEventId().equals(event.getEventId())).collect(toList())
+        ));
+        return Collections.unmodifiableList(rawFeed.getEvents());
     }
 
     private void startConnection(String ip, int port) throws IOException {
