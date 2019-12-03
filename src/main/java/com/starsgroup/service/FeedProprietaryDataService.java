@@ -1,5 +1,7 @@
 package com.starsgroup.service;
 
+import com.starsgroup.entity.FeedHeader;
+import com.starsgroup.util.FeedParser;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,10 @@ public class FeedProprietaryDataService {
     public void receiveData() throws IOException {
         try {
             startConnection(providerHost, providerPort);
+            String inputLine = null;
+            while ((inputLine = in.readLine()) != null) {
+                FeedHeader feedHeader = FeedParser.parseHeader(inputLine);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
