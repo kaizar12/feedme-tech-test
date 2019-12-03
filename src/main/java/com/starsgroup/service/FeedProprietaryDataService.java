@@ -51,8 +51,11 @@ public class FeedProprietaryDataService {
         }
     }
 
-    public void abortFeedProcess() throws IOException {
+    public List<Event> abortFeedProcess() throws IOException {
         stopConnection();
+        List<Event> unSavedEvents = transformFeeds();
+        fixtureService.addEvents(unSavedEvents);
+        return fixtureService.getAllEvents();
     }
 
     protected void parseFeed(String inputline, String feedType) {
