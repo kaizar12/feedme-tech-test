@@ -44,8 +44,6 @@ public class FeedProprietaryDataService {
             while((inputLine = in.readLine()) != null) {
                 dbUpsert(inputLine);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         } finally {
             stopConnection();
         }

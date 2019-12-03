@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -35,6 +36,9 @@ public class FeedProprietaryDataServiceTest {
     RawFeed rawFeedMocked;
 
     @Mock
+    BufferedReader bufferedReaderMocked;
+
+    @Mock
     FixtureService fixtureServiceMocked;
 
     @Before
@@ -42,12 +46,6 @@ public class FeedProprietaryDataServiceTest {
         feedProprietaryDataService = new FeedProprietaryDataService();
         feedProprietaryDataService.setClientSocket(socketMocked);
         when(socketMocked.getInputStream()).thenReturn(inputStreamMocked);
-    }
-
-    @Test
-    public void receiveData() throws IOException {
-        feedProprietaryDataService.receiveData();
-        verify(socketMocked).getInputStream();
     }
 
     @Test
